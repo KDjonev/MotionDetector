@@ -37,7 +37,7 @@ def ScoreByBackgroundSubtraction(
     return ForegroundPixelCount
 
 
-def DetectMotinFromWebcam(Threshhold, ConsecutiveToConsider):
+def DetectMotionFromWebcam(Threshhold, ConsecutiveToConsider):
     # Returns the Image that caused the Score to be average score to be greater
     # than a certain threashold. The score is decided from the webcam based
     # on a combination of scoring functions. Once a score above a threshold is
@@ -83,23 +83,28 @@ if __name__ == '__main__':
 
     from time import sleep
     import sys
-    sys.path.append("../SendEmail")
-    import EmailSender
-    from EmailOptions import EmailOptions
 
-    Image = DetectMotinFromWebcam(15000, 50)
-    while (Image is not None):
-        cv2.imwrite("MotionDetectedImage.png", Image)
-        EmailOptions = EmailOptions()
-        EmailOptions.LoadOptionsFromXml("HaltEmailOptions.eo")
-        EmailOptions.ParseOptionsFromCommandLine()
-        EmailSender.SendEmail(
-            EmailOptions.FromAddress,
-            EmailOptions.ToAddresses,
-            EmailOptions.Subject,
-            EmailOptions.Body,
-            "*.png",
-            EmailOptions.FromAddressPassword)
-        # Wait 10 minutes before trying again
-        sleep(600)
-        Image = DetectMotinFromWebcam(15000, 50)
+    sys.path.append("../SendEmail")
+    from EmailOptions import EmailOptions
+    import EmailSender
+
+    Image = DetectMotionFromWebcam(15000, 50)
+    try:
+        while (Image is not None):
+            cv2.imwrite("MotionDetectedImage.png", Image)
+            EmailOptions = EmailOptions()
+            EmailOptions.LoadOptionsFromXml("HaltEmailOptions.eo")
+            EmailOptions.ParseOptionsFromCommandLine()
+            EmailSender.SendEmail(
+                EmailOptions.FromAddress,
+                EmailOptions.ToAddresses,
+                EmailOptions.Subject,
+                EmailOptions.Body,
+                "*.png",
+                EmailOptions.FromAddressPassword)
+            # Wait 10 minutes before trying again
+            sleep(600)
+            Image = DetectMotionFromWebcam(15000, 50)
+
+    except KeyboardInterrupt:
+        sys.exit()
