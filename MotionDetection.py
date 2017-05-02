@@ -81,7 +81,7 @@ def DetectMotionFromWebcam(Threshhold, ConsecutiveToConsider):
 
 if __name__ == '__main__':
 
-    from time import sleep
+    from time import gmtime, strftime, sleep
     import sys
 
     sys.path.append("../SendEmail")
@@ -92,16 +92,18 @@ if __name__ == '__main__':
     try:
         while (Image is not None):
             cv2.imwrite("MotionDetectedImage.png", Image)
+
             EmailOptions = EmailOptions()
             EmailOptions.LoadOptionsFromXml("HaltEmailOptions.eo")
             EmailOptions.ParseOptionsFromCommandLine()
             EmailSender.SendEmail(
                 EmailOptions.FromAddress,
                 EmailOptions.ToAddresses,
-                EmailOptions.Subject,
+                strftime("%Y-%m-%d %H:%M:%S ", gmtime()) + EmailOptions.Subject,
                 EmailOptions.Body,
                 "*.png",
                 EmailOptions.FromAddressPassword)
+
             # Wait 10 minutes before trying again
             sleep(600)
             Image = DetectMotionFromWebcam(15000, 50)
